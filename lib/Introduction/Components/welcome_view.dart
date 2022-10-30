@@ -78,7 +78,7 @@ class WelcomeView extends StatelessWidget {
               SlideTransition(
                 position: _welcomeFirstHalfAnimation,
                 child: const Text(
-                  "Airdrop Insurance",
+                  "Stellantis Car-tech",
                   style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),
                 ),
               ),
