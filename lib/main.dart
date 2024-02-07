@@ -11,9 +11,8 @@ Future<void> main() async {
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
     theme: ThemeData(fontFamily: 'Avenir'),
-    initialRoute: 'intro',
+    initialRoute: 'home',
     routes: {
-      'intro': (context) => const IntroductionAnimationScreen(),
       'home': (context) => const HomePage(),
       'routing': (context) => const MapPage(),
     },

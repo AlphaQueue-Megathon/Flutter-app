@@ -29,7 +29,7 @@ class MapPageState extends State<MapPage> {
   PP.PolylinePoints polylinePoints = PP.PolylinePoints();
   Map<PolylineId, Polyline> polylines = {}; //polylines to show direction
   String location = "Search Location";
-  String googleAPIKey = "AIzaSyD7MzSVF3n7LDvDsuMQFPJBdhpQV9B3pog";
+  String googleAPIKey = "AIzaSyB5qPWFVxzgFufyrDEZuqeoMmfyl4fBX9I";
 
   // ignore: prefer_const_constructors
   static final CameraPosition kIIIT = CameraPosition(
@@ -108,136 +108,42 @@ class MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(children: [
-        SizedBox(
-          height: 30,
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Card(
+              clipBehavior: Clip.hardEdge,
+              child: InkWell(
+                splashColor: Colors.blue.withAlpha(30),
+                onTap: () {},
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: const SizedBox(
+                    width: 300,
+                    height: 100,
+                    child: Text('Solar energy received'),
+                  ),
+                ),
+              )),
         ),
-        TextButton(
-            child: Text("Add Checkpoint"),
-            onPressed: () async {
-              var place = await PlacesAutocomplete.show(
-                  context: context,
-                  apiKey: googleAPIKey,
-                  mode: Mode.overlay,
-                  types: [],
-                  strictbounds: false,
-                  onError: (err) {
-                    print(err);
+        Column(
+          children: [
+            SizedBox(
+              height: 30,
+            ),
+            Expanded(
+              child: GoogleMap(
+                mapType: MapType.normal,
+                initialCameraPosition: kIIIT,
+                markers: markers,
+                polylines: Set<Polyline>.of(polylines.values),
+                onMapCreated: (controller) {
+                  setState(() {
+                    _controller = controller;
                   });
-
-              if (place != null) {
-                setState(() {
-                  location = place.description.toString();
-                });
-
-                // form google_maps_webservice package
-                final plist = GoogleMapsPlaces(
-                  apiKey: googleAPIKey,
-                  apiHeaders: await GoogleApiHeaders().getHeaders(),
-                  //from google_api_headers package
-                );
-                String placeid = place.placeId ?? "0";
-                final detail = await plist.getDetailsByPlaceId(placeid);
-                final geometry = detail.result.geometry!;
-                final lat = geometry.location.lat;
-                final lang = geometry.location.lng;
-                var newlatlang = LatLng(lat, lang);
-                addMarker(geometry.location.toString(), newlatlang,
-                    detail.result.name);
-
-                // move map camera to selected place with animation
-                _controller?.animateCamera(CameraUpdate.newCameraPosition(
-                    CameraPosition(target: newlatlang, zoom: 17)));
-              }
-            }),
-        TextButton(
-            child: Text("Add Station"),
-            onPressed: () async {
-              var place = await PlacesAutocomplete.show(
-                  context: context,
-                  apiKey: googleAPIKey,
-                  mode: Mode.overlay,
-                  types: [],
-                  strictbounds: false,
-                  onError: (err) {
-                    print(err);
-                  });
-
-              if (place != null) {
-                setState(() {
-                  location = place.description.toString();
-                });
-
-                // form google_maps_webservice package
-                final plist = GoogleMapsPlaces(
-                  apiKey: googleAPIKey,
-                  apiHeaders: await GoogleApiHeaders().getHeaders(),
-                  //from google_api_headers package
-                );
-                String placeid = place.placeId ?? "0";
-                final detail = await plist.getDetailsByPlaceId(placeid);
-                final geometry = detail.result.geometry!;
-                final lat = geometry.location.lat;
-                final lang = geometry.location.lng;
-                var newlatlang = LatLng(lat, lang);
-                addSTMarker(geometry.location.toString(), newlatlang,
-                    detail.result.name);
-
-                // move map camera to selected place with animation
-                _controller?.animateCamera(CameraUpdate.newCameraPosition(
-                    CameraPosition(target: newlatlang, zoom: 17)));
-              }
-            }),
-        TextButton(
-            child: Text("Compute path"),
-            onPressed: () async {
-              print("Call unordered path");
-              var result = await unordered_path(markersL, markersR, 100);
-              var dist = result[0];
-              var path = result[1];
-              List<LatLng>? coordinates =
-                  (path as List)?.map((item) => item as LatLng)?.toList();
-              List<LatLng> polylineCoordinates = [];
-              String googleAPIKey = "AIzaSyD7MzSVF3n7LDvDsuMQFPJBdhpQV9B3pog";
-
-              for (int i = 0; i < coordinates!.length - 1; i++) {
-                PP.PolylineResult res =
-                    await polylinePoints.getRouteBetweenCoordinates(
-                  googleAPIKey,
-                  PP.PointLatLng(
-                      coordinates[i].latitude, coordinates[i].longitude),
-                  PP.PointLatLng(coordinates[i + 1].latitude,
-                      coordinates[i + 1].longitude),
-                  travelMode: PP.TravelMode.driving,
-                );
-                if (res.points.isNotEmpty) {
-                  res.points.forEach((PP.PointLatLng point) {
-                    polylineCoordinates
-                        .add(LatLng(point.latitude, point.longitude));
-                  });
-                } else {
-                  print(res.errorMessage);
-                }
-              }
-
-              addPolyLine(polylineCoordinates);
-              // Toast.show("Minimum time: " + dist.toString(),
-              //     duration: Toast.lengthShort, gravity: Toast.bottom);
-              // for (int i = 0; i < path.length; i++) {}
-              // print(dist);
-              // print(path);
-            }),
-        Expanded(
-          child: GoogleMap(
-            mapType: MapType.normal,
-            initialCameraPosition: kIIIT,
-            markers: markers,
-            polylines: Set<Polyline>.of(polylines.values),
-            onMapCreated: (controller) {
-              setState(() {
-                _controller = controller;
-              });
-            },
-          ),
+                },
+              ),
+            ),
+          ],
         ),
       ]),
     );
